@@ -1,0 +1,6 @@
+@ATIVIDADE_03___CODIFICAÇÃO_BACKEND_HostAddress = http://localhost:5218
+
+GET {{ATIVIDADE_03___CODIFICAÇÃO_BACKEND_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

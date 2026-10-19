@@ -6,22 +6,17 @@ using ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Models;
 namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
 
 {
-    //CONFIGURAÇÃO DA API
     [ApiController]
     [Route("api/[controller]")]
     public class PessoaEnderecoController : ControllerBase
     {
-        //DECLARAÇÃO DO ATRIBUTO DO CONTEXTO
         private readonly BdAulaBackendContext _context;
 
-        //DECLARAÇÃO DO MÉTODO CONSTRUTOR
         public PessoaEnderecoController(BdAulaBackendContext context)
         {
-            //INSTANCIANDO O ATRIBUTO _context
             _context = context;
         }
 
-        //LISTANDO TODAS AS PESSOAS COM SEUS RESPECTIVOS ENDEREÇOS
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PessoaDTO>>> GetALL()
@@ -136,18 +131,15 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<ActionResult<Pessoa>>> Put(int id, PessoaDTO dto)
         {
-            //BUSCA A PESSOA E SEUS ENDEREÇOS E ATRIBUI A VARIAVEL PESSOA
             var pessoa = await _context.Pessoas
                 .Include(p => p.Enderecos)
                 .FirstOrDefaultAsync(p => p.Idpessoa == id);
 
-            //VERIFICA SE A PESSOA EXISTE
             if (pessoa == null)
             {
                 return NotFound();
             }
 
-            //PROJETA OS DADOS DO PessoaDTO PARA O MODELO Pessoa ORIUNDA DO BANCO DE DADOS
             pessoa.Nome = dto.Nome;
             pessoa.Cpf = dto.Cpf;
             pessoa.DataNascimento = dto.DataNascimento;
@@ -156,7 +148,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             pessoa.Telefone = dto.Telefone;
             pessoa.AtivoPessoa = dto.AtivoPessoa;
 
-            //PECORRE OS ENDEREÇOS DA PESSOA
             foreach (var endPessoa in dto.Enderecos)
             {
                 if (endPessoa.Idpessoa > 0)
@@ -171,8 +162,7 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
                         return BadRequest($"O endereço não pertence a essa pessoa");
                     }
 
-                    //AO LOCALIZAR, PROJETA NO MODELO Endereco OS DADOS VINDO DO ATRIBUTO Endereços
-                    //DO MODELO O PESSOA QUE VENHO  DO PessoaDTO
+
                     endereco.Numero = endPessoa.Numero;
                     endereco.Cep = endPessoa.CEP;
                     endereco.Complemento = endPessoa.Complemento;
@@ -180,7 +170,7 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
                 else
                 {
 
-                    //CASO O ID NÂO SEJA MAIR QUE ZERO, È UM NOVO ENDEREÇO A SER ADICIONADO A PESSOA
+
                     pessoa.Enderecos.Add(new Endereco
                     {
                         Numero = endPessoa.Numero,
@@ -199,18 +189,18 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<Pessoa>> Delete(int id)
         {
-            //BUSCA A PESSOA E SEUS ENDEREÇOS E ATRIBUTOS A VARIAVEL PESSOA
+
             var pessoa = await _context.Pessoas
                 .Include(p => p.Enderecos)
                 .FirstOrDefaultAsync(p => p.Idpessoa == id);
 
-            //VERIFICA SE A PESSOA EXISTE
+
             if (pessoa == null)
             {
                 return NotFound();
             }
 
-            //PREPARA A INSTRUÇÂO PARA EXECUTAR NO BANCO DE DADOS
+
             _context.Pessoas.Remove(pessoa);
 
             await _context.SaveChangesAsync();

@@ -17,7 +17,7 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             _context = context;
         }
 
-        // LISTAR TODOS OS PRODUTOS
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Produto>>> GetProdutos()
         {
@@ -28,7 +28,7 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             return Ok(produtos);
         }
 
-        // BUSCAR PRODUTO POR ID
+
         [HttpGet("{id}")]
         public async Task<ActionResult<Produto>> GetProduto(int id)
         {
@@ -47,7 +47,7 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             return Ok(produto);
         }
 
-        // ADICIONAR PRODUTO
+
         [HttpPost]
         public async Task<ActionResult> PostProduto(ProdutoDTO dados)
         {
@@ -101,7 +101,7 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             }
         }
 
-        // ATUALIZAR PRODUTO
+
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProduto(
             int id,
@@ -150,7 +150,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             return NoContent();
         }
 
-        // EXCLUIR PRODUTO
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduto(int id)
         {

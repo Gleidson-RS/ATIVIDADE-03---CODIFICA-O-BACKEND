@@ -15,7 +15,6 @@ namespace AplicacaoBackAula.Controllers
             _context = context;
         }
 
-        // GET: api/Pessoas
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Pessoa>>> GetPessoas()
         {
@@ -23,7 +22,6 @@ namespace AplicacaoBackAula.Controllers
         }
 
 
-        // GET: api/Pessoas/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Pessoa>> GetPessoa(int id)
         {
@@ -39,7 +37,6 @@ namespace AplicacaoBackAula.Controllers
         }
 
 
-        // POST: api/Pessoas
         [HttpPost]
         public async Task<ActionResult<Pessoa>> PostPessoa(Pessoa Pessoa)
         {
@@ -55,7 +52,6 @@ namespace AplicacaoBackAula.Controllers
         }
 
 
-        // PUT: api/Pessoas/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPessoa(
             int id,
@@ -86,7 +82,6 @@ namespace AplicacaoBackAula.Controllers
         }
 
 
-        // DELETE: api/Pessoas/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePessoa(int id)
         {

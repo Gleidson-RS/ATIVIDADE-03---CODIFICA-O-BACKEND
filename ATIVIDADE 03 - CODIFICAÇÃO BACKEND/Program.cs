@@ -1,12 +1,25 @@
+using ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Models;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Configuração do banco de dados MySQL
+builder.Services.AddDbContext<BdAulaBackendContext>(options =>
+    options.UseMySql(
+        builder.Configuration.GetConnectionString("connection"),
+        ServerVersion.AutoDetect(
+            builder.Configuration.GetConnectionString("connection")
+        )
+    )
+);
+
+// Construção da aplicação
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

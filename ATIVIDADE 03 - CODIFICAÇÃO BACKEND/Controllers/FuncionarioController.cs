@@ -16,13 +16,11 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             _context = context;
         }
 
-        // ---------- CONSULTA BASE (funcionário + pessoa + endereços) ----------
         private IQueryable<Funcionario> ConsultaCompleta() =>
             _context.Funcionarios
                 .Include(f => f.IdpessoaNavigation)
                     .ThenInclude(p => p.Enderecos);
 
-        // ---------- MAPEAMENTO MODEL -> DTO ----------
         private static FuncionarioResponseDTO ToResponse(Funcionario f) => new()
         {
             Idpessoa = f.Idpessoa,
@@ -49,7 +47,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             }
         };
 
-        // ---------- VALIDAÇÕES (retornam a mensagem de erro, ou null se estiver ok) ----------
         private static string? ValidarFuncionario(FuncionarioRequestDTO dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Cargo))
@@ -95,7 +92,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             return null;
         }
 
-        // ---------- GET ALL ----------
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FuncionarioResponseDTO>>> GetAll()
         {
@@ -103,7 +99,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             return Ok(lista.Select(ToResponse));
         }
 
-        // ---------- GET POR ID ----------
         [HttpGet("{id}")]
         public async Task<ActionResult<FuncionarioResponseDTO>> GetById(int id)
         {
@@ -117,7 +112,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             return Ok(ToResponse(funcionario));
         }
 
-        // ---------- POST ----------
         [HttpPost]
         public async Task<ActionResult<FuncionarioResponseDTO>> Post(FuncionarioRequestDTO dto)
         {
@@ -128,7 +122,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
 
             if (dto.Pessoa.Idpessoa > 0)
             {
-                // VINCULA A UMA PESSOA JÁ EXISTENTE
                 var pessoaExistente = await _context.Pessoas
                     .Include(p => p.Enderecos)
                     .FirstOrDefaultAsync(p => p.Idpessoa == dto.Pessoa.Idpessoa);
@@ -136,7 +129,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
                 if (pessoaExistente == null)
                     return NotFound($"Pessoa {dto.Pessoa.Idpessoa} não encontrada.");
 
-                // A PESSOA NÃO PODE SER FUNCIONÁRIA DUAS VEZES (chave compartilhada)
                 if (await _context.Funcionarios.AnyAsync(f => f.Idpessoa == pessoaExistente.Idpessoa))
                     return Conflict("Essa pessoa já está cadastrada como funcionário.");
 
@@ -144,7 +136,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             }
             else
             {
-                // CRIA A PESSOA COM OS ENDEREÇOS
                 erro = ValidarPessoa(dto.Pessoa);
                 if (erro != null) return BadRequest(erro);
 
@@ -179,7 +170,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
 
             _context.Funcionarios.Add(funcionario);
 
-            // UM ÚNICO SaveChanges = TUDO OU NADA (pessoa + endereços + funcionário)
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetById),
@@ -187,7 +177,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
                 ToResponse(funcionario));
         }
 
-        // ---------- PUT ----------
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, FuncionarioRequestDTO dto)
         {
@@ -204,11 +193,9 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             if (await _context.Pessoas.AnyAsync(p => p.Cpf == dto.Pessoa.Cpf && p.Idpessoa != id))
                 return Conflict("Esse CPF pertence a outra pessoa.");
 
-            // DADOS DO FUNCIONÁRIO
             funcionario.Cargo = dto.Cargo!;
             funcionario.DataAdmissao = dto.DataAdmissao;
 
-            // DADOS DA PESSOA
             var pessoa = funcionario.IdpessoaNavigation;
             pessoa.Nome = dto.Pessoa.Nome!;
             pessoa.Cpf = dto.Pessoa.Cpf;
@@ -218,8 +205,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             pessoa.Telefone = dto.Pessoa.Telefone;
             pessoa.AtivoPessoa = dto.Pessoa.AtivoPessoa!;
 
-            // ENDEREÇOS: Idendereco > 0 atualiza, Idendereco == 0 cria.
-            // (endereços que não vierem no DTO são mantidos)
             foreach (var e in dto.Pessoa.Enderecos)
             {
                 if (e.Idendereco > 0)
@@ -247,7 +232,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             return NoContent();
         }
 
-        // ---------- DELETE ----------
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -255,11 +239,9 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             if (funcionario == null)
                 return NotFound($"Funcionário {id} não encontrado.");
 
-            // NÃO EXCLUI SE O FUNCIONÁRIO JÁ ATENDEU ALGUÉM
             if (await _context.Atendimentoitems.AnyAsync(a => a.Idfuncionario == id))
                 return Conflict("Não é possível excluir: o funcionário está vinculado a atendimentos.");
 
-            // REMOVE SÓ O FUNCIONÁRIO; A PESSOA CONTINUA NO BANCO
             _context.Funcionarios.Remove(funcionario);
             await _context.SaveChangesAsync();
 

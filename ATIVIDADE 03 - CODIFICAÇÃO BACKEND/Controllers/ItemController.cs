@@ -42,14 +42,12 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             if (string.IsNullOrWhiteSpace(dto.AtivoProdutoServico) || dto.AtivoProdutoServico.Length != 1)
                 return "O campo AtivoProdutoServico deve ter exatamente 1 caractere.";
 
-            // RELACIONAMENTO: a categoria precisa existir
             if (!await _context.Categoria.AnyAsync(c => c.Idcategoria == dto.Idcategoria))
                 return $"Categoria {dto.Idcategoria} não encontrada.";
 
             return null;
         }
 
-        // ---------- GET ALL ----------
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ItemResponseDTO>>> GetAll()
         {
@@ -57,7 +55,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             return Ok(lista);
         }
 
-        // ---------- GET POR ID ----------
         [HttpGet("{id}")]
         public async Task<ActionResult<ItemResponseDTO>> GetById(int id)
         {
@@ -70,7 +67,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             return Ok(item);
         }
 
-        // ---------- POST ----------
         [HttpPost]
         public async Task<ActionResult<ItemResponseDTO>> Post(ItemRequestDTO dto)
         {
@@ -96,7 +92,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             return CreatedAtAction(nameof(GetById), new { id = item.Iditem }, resposta);
         }
 
-        // ---------- PUT ----------
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, ItemRequestDTO dto)
         {
@@ -118,7 +113,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             return NoContent();
         }
 
-        // ---------- DELETE ----------
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -126,7 +120,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             if (item == null)
                 return NotFound($"Item {id} não encontrado.");
 
-            // O ITEM NÃO PODE ESTAR EM USO
             if (await _context.Produtos.AnyAsync(p => p.Iditem == id))
                 return Conflict("Não é possível excluir: o item é um produto. Exclua pelo ProdutoItemController.");
 

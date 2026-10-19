@@ -16,7 +16,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             _context = context;
         }
 
-        // ---------- PROJEÇÃO: atendimento + pessoa + itens ----------
         private static IQueryable<AtendimentoResponseDTO> Projetar(IQueryable<Atendimento> consulta) =>
             consulta.Select(a => new AtendimentoResponseDTO
             {
@@ -42,7 +41,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
                 }).ToList()
             });
 
-        // ---------- VALIDAÇÕES (retornam a mensagem de erro, ou null se estiver ok) ----------
         private async Task<string?> ValidarAsync(AtendimentoRequestDTO dto)
         {
             if (!await _context.Pessoas.AnyAsync(p => p.Idpessoa == dto.Idpessoa))
@@ -54,7 +52,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             if (dto.Itens.Count == 0)
                 return "O atendimento precisa ter pelo menos um item.";
 
-            // (Iditem, Idatendimento) é a chave primária: o mesmo item não pode repetir
             var repetido = dto.Itens.GroupBy(i => i.Iditem).FirstOrDefault(g => g.Count() > 1);
             if (repetido != null)
                 return $"O item {repetido.Key} está repetido. Some as quantidades em uma única linha.";
@@ -67,7 +64,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
                     return $"O valor unitário do item {i.Iditem} não pode ser negativo.";
             }
 
-            // RELACIONAMENTOS: itens e funcionários precisam existir
             var idsItens = dto.Itens.Select(i => i.Iditem).Distinct().ToList();
             var itensExistentes = await _context.Items
                 .Where(i => idsItens.Contains(i.Iditem))
@@ -92,7 +88,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
         private Task<AtendimentoResponseDTO> BuscarRespostaAsync(int id) =>
             Projetar(_context.Atendimentos.AsNoTracking().Where(a => a.Idatendimento == id)).FirstAsync();
 
-        // ---------- GET ALL (filtro opcional ?idpessoa=) ----------
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AtendimentoResponseDTO>>> GetAll([FromQuery] int? idpessoa)
         {
@@ -105,7 +100,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             return Ok(lista);
         }
 
-        // ---------- GET POR ID ----------
         [HttpGet("{id}")]
         public async Task<ActionResult<AtendimentoResponseDTO>> GetById(int id)
         {
@@ -119,7 +113,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             return Ok(atendimento);
         }
 
-        // ---------- POST ----------
         [HttpPost]
         public async Task<ActionResult<AtendimentoResponseDTO>> Post(AtendimentoRequestDTO dto)
         {
@@ -141,13 +134,12 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             };
 
             _context.Atendimentos.Add(atendimento);
-            await _context.SaveChangesAsync();   // atendimento + itens, tudo ou nada
+            await _context.SaveChangesAsync();
 
             var resposta = await BuscarRespostaAsync(atendimento.Idatendimento);
             return CreatedAtAction(nameof(GetById), new { id = atendimento.Idatendimento }, resposta);
         }
 
-        // ---------- PUT ----------
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, AtendimentoRequestDTO dto)
         {
@@ -165,7 +157,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             atendimento.DataAtendimento = dto.DataAtendimento;
             atendimento.StatusAtendimento = dto.StatusAtendimento!;
 
-            // SINCRONIZA OS ITENS: remove os que sumiram, atualiza os existentes, adiciona os novos
             var idsRecebidos = dto.Itens.Select(i => i.Iditem).ToHashSet();
 
             var removidos = atendimento.Atendimentoitems
@@ -199,7 +190,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             return NoContent();
         }
 
-        // ---------- DELETE ----------
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -212,7 +202,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
 
             try
             {
-                // PRIMEIRO OS ITENS (filhos), DEPOIS O ATENDIMENTO
                 _context.Atendimentoitems.RemoveRange(atendimento.Atendimentoitems);
                 _context.Atendimentos.Remove(atendimento);
                 await _context.SaveChangesAsync();

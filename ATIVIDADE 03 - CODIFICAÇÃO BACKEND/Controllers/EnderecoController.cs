@@ -15,7 +15,6 @@ namespace AplicacaoBackAula.Controllers
             _context = context;
         }
 
-        // GET: api/Enderecos
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Endereco>>> GetEnderecos()
         {
@@ -23,7 +22,6 @@ namespace AplicacaoBackAula.Controllers
         }
 
 
-        // GET: api/Enderecos/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Endereco>> GetEndereco(int id)
         {
@@ -39,7 +37,6 @@ namespace AplicacaoBackAula.Controllers
         }
 
 
-        // POST: api/Enderecos
         [HttpPost]
         public async Task<ActionResult<Endereco>> PostEndereco(Endereco Endereco)
         {
@@ -55,7 +52,6 @@ namespace AplicacaoBackAula.Controllers
         }
 
 
-        // PUT: api/Enderecos/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutEndereco(
             int id,
@@ -86,7 +82,6 @@ namespace AplicacaoBackAula.Controllers
         }
 
 
-        // DELETE: api/Enderecos/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEndereco(int id)
         {

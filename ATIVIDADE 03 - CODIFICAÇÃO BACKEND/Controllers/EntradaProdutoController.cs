@@ -16,8 +16,7 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             _context = context;
         }
 
-        // ---------- PROJEÇÃO MODEL -> DTO ----------
-        // Entradaproduto -> Estoque -> Produto -> Item (para pegar o nome)
+
         private static IQueryable<EntradaProdutoResponseDTO> Projetar(IQueryable<Entradaproduto> consulta) =>
             consulta.Select(e => new EntradaProdutoResponseDTO
             {
@@ -45,14 +44,12 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             return null;
         }
 
-        // Quantidade atual em estoque do item (null = item sem registro em estoque)
         private async Task<int?> ObterEstoqueAsync(int iditem) =>
             await _context.Estoques.AsNoTracking()
                 .Where(e => e.Iditem == iditem)
                 .Select(e => (int?)e.QuantidadeEstoque)
                 .FirstOrDefaultAsync();
 
-        // ---------- GET ALL (filtro opcional ?iditem=) ----------
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EntradaProdutoResponseDTO>>> GetAll([FromQuery] int? iditem)
         {
@@ -65,7 +62,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             return Ok(lista);
         }
 
-        // ---------- GET POR ID ----------
         [HttpGet("{id}")]
         public async Task<ActionResult<EntradaProdutoResponseDTO>> GetById(int id)
         {
@@ -79,7 +75,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             return Ok(entrada);
         }
 
-        // ---------- POST ----------
         [HttpPost]
         public async Task<ActionResult<EntradaProdutoResponseDTO>> Post(EntradaProdutoRequestDTO dto)
         {
@@ -100,11 +95,9 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
 
             _context.Entradaprodutos.Add(entrada);
 
-            // A TRIGGER DO BANCO ATUALIZA O ESTOQUE AQUI.
-            // O controller NÃO mexe em Estoque.QuantidadeEstoque (senão contaria em dobro).
+
             await _context.SaveChangesAsync();
 
-            // RELÊ DO BANCO PARA DEVOLVER O ESTOQUE JÁ ATUALIZADO PELA TRIGGER
             var resposta = await Projetar(_context.Entradaprodutos.AsNoTracking()
                 .Where(e => e.Identradaproduto == entrada.Identradaproduto && e.Iditem == entrada.Iditem))
                 .FirstAsync();
@@ -112,7 +105,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             return CreatedAtAction(nameof(GetById), new { id = entrada.Identradaproduto }, resposta);
         }
 
-        // ---------- PUT ----------
         [HttpPut("{id}")]
         public async Task<ActionResult<EntradaProdutoResponseDTO>> Put(int id, EntradaProdutoRequestDTO dto)
         {
@@ -123,11 +115,9 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             if (entrada == null)
                 return NotFound($"Entrada {id} não encontrada.");
 
-            // Iditem faz parte da chave primária: não dá para trocar
             if (dto.Iditem != entrada.Iditem)
                 return BadRequest("Não é permitido trocar o item de uma entrada. Exclua e cadastre outra.");
 
-            // SE A QUANTIDADE DIMINUIR, O ESTOQUE NÃO PODE FICAR NEGATIVO
             var estoque = await ObterEstoqueAsync(entrada.Iditem);
             var diferenca = dto.QuantidadeEntrada - entrada.QuantidadeEntrada;
             if (estoque != null && estoque.Value + diferenca < 0)
@@ -138,7 +128,7 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             entrada.Unidade = dto.Unidade!;
             entrada.ValorUnitarioEntrada = dto.ValorUnitarioEntrada;
 
-            await _context.SaveChangesAsync();   // trigger de UPDATE roda aqui
+            await _context.SaveChangesAsync();
 
             var resposta = await Projetar(_context.Entradaprodutos.AsNoTracking()
                 .Where(e => e.Identradaproduto == id && e.Iditem == entrada.Iditem))
@@ -147,7 +137,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             return Ok(resposta);
         }
 
-        // ---------- DELETE ----------
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -155,13 +144,12 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.Controllers
             if (entrada == null)
                 return NotFound($"Entrada {id} não encontrada.");
 
-            // AO EXCLUIR, O ESTOQUE PERDE A QUANTIDADE DA ENTRADA: NÃO PODE FICAR NEGATIVO
             var estoque = await ObterEstoqueAsync(entrada.Iditem);
             if (estoque != null && estoque.Value < entrada.QuantidadeEntrada)
                 return Conflict("Não é possível excluir: parte dessa entrada já foi consumida e o estoque ficaria negativo.");
 
             _context.Entradaprodutos.Remove(entrada);
-            await _context.SaveChangesAsync();   // trigger de DELETE roda aqui
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }

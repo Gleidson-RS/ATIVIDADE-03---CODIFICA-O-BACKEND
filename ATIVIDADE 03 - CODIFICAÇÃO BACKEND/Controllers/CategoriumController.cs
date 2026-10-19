@@ -15,7 +15,6 @@ namespace AulaBackend.Controllers
             _context = context;
         }
 
-        // GET: api/Categorium
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Categorium>>> GetCategorias()
         {
@@ -23,7 +22,6 @@ namespace AulaBackend.Controllers
         }
 
 
-        // GET: api/Categorium/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Categorium>> GetCategoria(int id)
         {
@@ -39,7 +37,6 @@ namespace AulaBackend.Controllers
         }
 
 
-        // POST: api/Categorium
         [HttpPost]
         public async Task<ActionResult<Categorium>> PostCategoria(Categorium categoria)
         {
@@ -55,7 +52,6 @@ namespace AulaBackend.Controllers
         }
 
 
-        // PUT: api/Categorium/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCategoria(
             int id,
@@ -86,7 +82,6 @@ namespace AulaBackend.Controllers
         }
 
 
-        // DELETE: api/Categorium/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategoria(int id)
         {

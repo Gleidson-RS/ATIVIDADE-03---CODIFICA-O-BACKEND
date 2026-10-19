@@ -1,23 +1,22 @@
 namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.DTO
 {
-    // ---------- ENTRADA ----------
     public class AtendimentoItemRequestDTO
     {
         public int Iditem { get; set; }
-        public int Idfuncionario { get; set; }      // = Idpessoa do funcionário
+        public int Idfuncionario { get; set; }      
         public int QuantidadeItens { get; set; }
         public decimal ValorUnitario { get; set; }
     }
 
     public class AtendimentoRequestDTO
     {
-        public int Idpessoa { get; set; }           // cliente atendido
+        public int Idpessoa { get; set; }           
         public DateOnly DataAtendimento { get; set; }
         public string? StatusAtendimento { get; set; }
         public List<AtendimentoItemRequestDTO> Itens { get; set; } = new();
     }
 
-    // ---------- SAÍDA ----------
+    
     public class AtendimentoPessoaDTO
     {
         public int Idpessoa { get; set; }

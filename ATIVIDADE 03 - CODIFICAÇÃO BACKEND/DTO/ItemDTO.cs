@@ -1,6 +1,5 @@
 namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.DTO
 {
-    // ENTRADA (POST/PUT)
     public class ItemRequestDTO
     {
         public int Idcategoria { get; set; }
@@ -11,7 +10,6 @@ namespace ATIVIDADE_03___CODIFICAÇÃO_BACKEND.DTO
         public string? AtivoProdutoServico { get; set; }
     }
 
-    // SAÍDA (GET/POST)
     public class ItemResponseDTO
     {
         public int Iditem { get; set; }
